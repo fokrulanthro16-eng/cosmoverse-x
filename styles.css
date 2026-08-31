@@ -743,6 +743,26 @@ html, body, canvas, #bg {
   transform: translate(12px, 12px);
 }
 
+#rec-status-badge {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 0, 85, 0.2);
+  border: 1px solid #ff0055;
+  color: #ff0055;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  animation: pulseRec 1s infinite alternate;
+}
+@keyframes pulseRec {
+  from { opacity: 0.5; box-shadow: 0 0 5px #ff0055; }
+  to { opacity: 1; box-shadow: 0 0 15px #ff0055; }
+}
+
 @media (max-width: 1100px) {
   .astrodynamics-panel { display: none; }
   .pedia-left-drawer { width: 280px; }

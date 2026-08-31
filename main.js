@@ -1557,7 +1557,179 @@ function renderPediaEntities() {
 }
 
 // ============================================================
-// 9. 6-DOF STARSHIP FLIGHT & RELATIVISTIC WARP (MODE A)
+// 9. MEDIARECORDER CANVAS CAPTURE ENGINE & 40s CINEMATIC TOUR
+// ============================================================
+const VideoRecorder = {
+  recorder: null,
+  recordedChunks: [],
+  isRecording: false,
+
+  start() {
+    if (this.isRecording) return;
+    try {
+      const canvas = renderer.domElement;
+      const stream = canvas.captureStream(60);
+      this.recordedChunks = [];
+      
+      let mimeType = 'video/webm; codecs=vp9';
+      if (typeof MediaRecorder !== 'undefined' && !MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'video/webm';
+      }
+
+      this.recorder = new MediaRecorder(stream, {
+        mimeType: mimeType,
+        videoBitsPerSecond: 12000000 // 12 Mbps ultra-high quality
+      });
+
+      this.recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) this.recordedChunks.push(e.data);
+      };
+
+      this.recorder.onstop = () => {
+        const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.download = `cosmoverse-cinematic-trailer-${Date.now()}.webm`;
+        a.href = url;
+        a.click();
+        URL.revokeObjectURL(url);
+      };
+
+      this.recorder.start();
+      this.isRecording = true;
+      this.updateRecordHUD(true);
+      speakAI('Video Recording Started. Capturing 60 FPS 12 Mbps stream.');
+    } catch (err) {
+      console.error('VideoRecorder error:', err);
+    }
+  },
+
+  stop() {
+    if (this.recorder && this.isRecording) {
+      this.recorder.stop();
+      this.isRecording = false;
+      this.updateRecordHUD(false);
+      speakAI('Video Recording Saved.');
+    }
+  },
+
+  toggle() {
+    if (this.isRecording) this.stop();
+    else this.start();
+  },
+
+  updateRecordHUD(recording) {
+    const badge = document.getElementById('rec-status-badge');
+    const btn = document.getElementById('btn-video-rec');
+    if (badge) {
+      badge.style.display = recording ? 'flex' : 'none';
+    }
+    if (btn) {
+      btn.classList.toggle('active', recording);
+      btn.innerHTML = recording ? '⏹️ STOP REC (R)' : '🎥 REC (R)';
+    }
+  }
+};
+
+let tourActive = false;
+let tourTimer = null;
+
+function startCinematicTour() {
+  if (tourActive) {
+    stopCinematicTour();
+    return;
+  }
+
+  tourActive = true;
+  const tourBtn = document.getElementById('btn-trailer-tour');
+  if (tourBtn) {
+    tourBtn.classList.add('active');
+    tourBtn.innerHTML = '⏹️ STOP TOUR (T)';
+  }
+
+  speakAI('Commencing 40-Second Automated Cinematic Universe Tour.');
+  VideoRecorder.start();
+
+  // Phase 1 (0s - 8s): Earth Orbital Flyaround
+  switchMode('UNIVERSE', 'earth');
+  camera.position.set(76 + 8, 3, 8);
+  controls.target.set(76, 0, 0);
+
+  let elapsed = 0;
+  const tourInterval = setInterval(() => {
+    elapsed += 0.1;
+
+    // 0s - 8s: Earth orbit
+    if (elapsed < 8.0) {
+      const angle = elapsed * 0.4;
+      camera.position.set(76 + Math.cos(angle) * 7.5, Math.sin(angle * 0.5) * 2.5 + 2.0, Math.sin(angle) * 7.5);
+      controls.target.set(76, 0, 0);
+    }
+    // 8s - 16s: Hyper-warp glide through Jupiter and Saturn
+    else if (elapsed >= 8.0 && elapsed < 16.0) {
+      if (elapsed >= 8.0 && elapsed < 8.2) focusOnCelestialObject('jupiter');
+      if (elapsed >= 12.0 && elapsed < 12.2) focusOnCelestialObject('saturn');
+      const angle = (elapsed - 8.0) * 0.5;
+      const targetPos = celestialObjects.saturn ? celestialObjects.saturn.group.position : new THREE.Vector3(260, 0, 0);
+      camera.position.set(targetPos.x + Math.cos(angle) * 16, 6 + Math.sin(angle) * 4, targetPos.z + Math.sin(angle) * 16);
+      controls.target.copy(targetPos);
+    }
+    // 16s - 26s: Gargantua Kerr Black Hole slow orbit
+    else if (elapsed >= 16.0 && elapsed < 26.0) {
+      if (elapsed >= 16.0 && elapsed < 16.2) focusOnCelestialObject('gargantua');
+      const angle = (elapsed - 16.0) * 0.25;
+      const bhPos = celestialObjects.gargantua ? celestialObjects.gargantua.group.position : new THREE.Vector3(450, 0, 0);
+      camera.position.set(bhPos.x + Math.cos(angle) * 22, 5 + Math.sin(angle) * 3, bhPos.z + Math.sin(angle) * 22);
+      controls.target.copy(bhPos);
+    }
+    // 26s - 34s: Transition to CosmoPedia Mode: 360° spin of Orion Nebula & Pulsar
+    else if (elapsed >= 26.0 && elapsed < 34.0) {
+      if (elapsed >= 26.0 && elapsed < 26.2) {
+        switchMode('COSMOPEDIA', 'orion_nebula');
+      }
+      if (elapsed >= 30.0 && elapsed < 30.2) {
+        mountCosmopediaObject('vela_pulsar');
+      }
+      const angle = (elapsed - 26.0) * 0.6;
+      camera.position.set(Math.cos(angle) * 9.0, 3.5 + Math.sin(angle * 0.5) * 1.5, Math.sin(angle) * 9.0);
+      controls.target.set(0, 0, 0);
+    }
+    // 34s - 40s: Macro Zoom-out to Cosmic Web filaments and CMB Horizon
+    else if (elapsed >= 34.0 && elapsed < 40.0) {
+      if (elapsed >= 34.0 && elapsed < 34.2) {
+        switchMode('UNIVERSE');
+      }
+      const p = (elapsed - 34.0) / 6.0;
+      camera.position.set(0, 1500 + p * 12000, 3000 + p * 20000);
+      controls.target.set(0, 0, 0);
+    }
+    // 40s: Tour complete
+    else if (elapsed >= 40.0) {
+      stopCinematicTour();
+    }
+  }, 100);
+
+  tourTimer = tourInterval;
+}
+
+function stopCinematicTour() {
+  if (!tourActive) return;
+  tourActive = false;
+  if (tourTimer) {
+    clearInterval(tourTimer);
+    tourTimer = null;
+  }
+  const tourBtn = document.getElementById('btn-trailer-tour');
+  if (tourBtn) {
+    tourBtn.classList.remove('active');
+    tourBtn.innerHTML = '🎬 TOUR (T)';
+  }
+  VideoRecorder.stop();
+  speakAI('Cinematic Universe Tour Completed.');
+}
+
+// ============================================================
+// 10. 6-DOF STARSHIP FLIGHT & RELATIVISTIC WARP (MODE A)
 // ============================================================
 const keys = {};
 
@@ -1565,6 +1737,8 @@ window.addEventListener('keydown', (e) => {
   keys[e.code] = true;
   if (e.code === 'KeyC' && EngineState.currentMode === 'UNIVERSE') toggleFlightMode();
   if (e.code === 'KeyF' && EngineState.currentMode === 'UNIVERSE') triggerRelativisticWarp();
+  if (e.key === 'r' || e.key === 'R') VideoRecorder.toggle();
+  if (e.key === 't' || e.key === 'T') startCinematicTour();
   
   // Press 'P' to export pristine canvas screenshot
   if (e.key === 'p' || e.key === 'P') {
@@ -1808,7 +1982,11 @@ function setupEventListeners() {
   const btnCockpit = document.getElementById('btn-cockpit');
   const btnWarp = document.getElementById('btn-warp');
   const voiceBtn = document.getElementById('voice-btn');
+  const btnTour = document.getElementById('btn-trailer-tour');
+  const btnRec = document.getElementById('btn-video-rec');
 
+  if (btnTour) btnTour.addEventListener('click', startCinematicTour);
+  if (btnRec) btnRec.addEventListener('click', () => VideoRecorder.toggle());
   if (btnAudio) btnAudio.addEventListener('click', toggleAudio);
   if (btnCockpit) btnCockpit.addEventListener('click', toggleFlightMode);
   if (btnWarp) btnWarp.addEventListener('click', triggerRelativisticWarp);

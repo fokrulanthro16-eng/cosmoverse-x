@@ -98,7 +98,11 @@
 | **`A` / `D`** | Lateral Strafe Left / Right |
 | **`Q` / `E`** | Roll Counter-Clockwise / Clockwise |
 | **`Space` / `Shift`** | Ascend / Descend Elevation |
+| **`C`** | Toggle 6-DOF Cockpit / Orbit Mode |
 | **`F`** | Toggle Relativistic Warp Speed |
+| **`T`** | Start Automated 40s Cinematic Tour + Auto-Rec |
+| **`R`** | Toggle 60 FPS 12Mbps Video Recording |
+| **`P`** | Export High-Res Canvas Screenshot (PNG) |
 | **`Mouse Drag`** | Pitch / Yaw Flight Vector |
 
 ### CosmoPedia Mode (Mode B)
@@ -106,9 +110,12 @@
 | :--- | :--- |
 | **`Left Click + Drag`** | 360° Object Turntable Rotation |
 | **`Scroll Wheel`** | Zoom In / Out |
+| **`Sunlight Slider`** | Rotate Dynamic Sun Direction (0° - 360°) |
+| **`Shading Mode`** | Switch [✨ Natural PBR], [🌡️ Thermal], [🌐 Wire] |
 | **`Compare with Earth`** | Spawn True-Scale Earth Reference |
 | **`🔊 Listen / শুনুন`** | Trigger Neural Audio Narration (EN/BN) |
 | **`Locate in Universe`** | Bridge to Open-World Coordinates |
+| **`R` / `P`** | Record Video (WebM) / Capture Screenshot (PNG) |
 
 ---
 
