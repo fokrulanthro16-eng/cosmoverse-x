@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CosmoVerse X v2.0: Dual-Core Universe & Cosmopedia 3D</title>
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Three.js r128 & Post-Processing Stack -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+</head>
+<body>
+  <!-- Fullscreen WebGL Canvas -->
+  <canvas id="bg"></canvas>
+
+  <div id="warp-overlay" class="warp-overlay"></div>
+
+  <!-- 6-DOF STARSHIP COCKPIT OVERLAY -->
+  <div id="cockpit-overlay">
+    <div class="cockpit-frame">
+      <div class="cockpit-crosshair"></div>
+      <div class="cockpit-instrument-left">
+        <span class="cockpit-stat-label">THRUST / VELOCITY</span>
+        <span id="hud-thrust-val" class="cockpit-stat-val">0.00 km/s</span>
+        <span class="cockpit-stat-label">HEADING / PITCH</span>
+        <span id="hud-pitch-val" class="cockpit-stat-val">0.0° // 0.0°</span>
+      </div>
+      <div class="cockpit-instrument-right">
+        <span class="cockpit-stat-label">WARP DRIVE STATUS</span>
+        <span id="hud-warp-status" class="cockpit-stat-val" style="color: var(--accent-green);">STANDBY (PRESS F)</span>
+        <span class="cockpit-stat-label">RELATIVISTIC GAMMA (γ)</span>
+        <span id="hud-gamma-val" class="cockpit-stat-val">1.000000</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Hover Tooltip -->
+  <div id="hover-tooltip"></div>
+
+  <!-- MASTER TOP HEADER (PERSISTENT ACROSS BOTH MODES) -->
+  <header class="top-header">
+    <div class="brand-section glass-panel">
+      <div class="brand-logo"></div>
+      <div>
+        <div class="brand-title">COSMOVERSE X v2.0</div>
+      </div>
+    </div>
+
+    <!-- DUAL-MODE CONTROLLER SWITCHER -->
+    <div class="mode-switcher">
+      <button id="btn-mode-universe" class="mode-btn active" data-mode="UNIVERSE">
+        <span>🌌</span> UNIVERSE SIMULATION
+      </button>
+      <button id="btn-mode-cosmopedia" class="mode-btn" data-mode="COSMOPEDIA">
+        <span>📚</span> COSMOPEDIA 3D (250+)
+      </button>
+    </div>
+
+    <div class="header-actions">
+      <!-- Voice AI Badge -->
+      <div id="voice-btn" class="voice-badge glass-panel" title="Toggle Voice Co-Pilot">
+        <div class="voice-wave"></div>
+        <span id="voice-label" class="voice-text">VOICE AI: READY</span>
+      </div>
+      <!-- Audio Toggle -->
+      <button id="btn-audio" class="icon-btn">🔇 AUDIO</button>
+      <!-- Cockpit Flight Mode (Mode A) -->
+      <button id="btn-cockpit" class="icon-btn">✈️ FLIGHT (C)</button>
+      <!-- Warp Drive (Mode A) -->
+      <button id="btn-warp" class="icon-btn">⚡ WARP (F)</button>
+    </div>
+  </header>
+
+  <!-- ============================================================ -->
+  <!-- MODE A: UNIVERSE TWIN SIMULATION HUD -->
+  <!-- ============================================================ -->
+  <div id="universe-hud">
+    <!-- Macro Cosmological Tier Dock -->
+    <div class="tier-dock glass-panel">
+      <button class="tier-btn" data-tier="universe">LEVEL 5: CMB HORIZON</button>
+      <button class="tier-btn" data-tier="cosmicweb">LEVEL 4: COSMIC WEB</button>
+      <button class="tier-btn" data-tier="milkyway">LEVEL 3: MILKY WAY</button>
+      <button class="tier-btn active" data-tier="solarsystem">LEVEL 2: SOLAR SYSTEM</button>
+      <button class="tier-btn" data-tier="surfaceskim">LEVEL 1: SURFACE SKIM</button>
+    </div>
+
+    <!-- Celestial Quick Jump Bar -->
+    <div class="quick-jump-bar glass-panel">
+      <button class="jump-btn" data-target="universe">CMB</button>
+      <button class="jump-btn" data-target="cosmicweb">Web</button>
+      <button class="jump-btn" data-target="milkyway">Milky Way</button>
+      <button class="jump-btn" data-target="gargantua">Gargantua BH</button>
+      <button class="jump-btn" data-target="pulsar">Vela Pulsar</button>
+      <button class="jump-btn" data-target="wormhole">Wormhole</button>
+      <button class="jump-btn" data-target="sun">Sun</button>
+      <button class="jump-btn" data-target="mercury">Mercury</button>
+      <button class="jump-btn" data-target="venus">Venus</button>
+      <button class="jump-btn active" data-target="earth">Earth</button>
+      <button class="jump-btn" data-target="moon">Moon</button>
+      <button class="jump-btn" data-target="mars">Mars</button>
+      <button class="jump-btn" data-target="belt">Asteroids</button>
+      <button class="jump-btn" data-target="jupiter">Jupiter</button>
+      <button class="jump-btn" data-target="saturn">Saturn</button>
+    </div>
+
+    <!-- Live Relativistic Astrodynamics Telemetry HUD -->
+    <aside class="astrodynamics-panel glass-panel">
+      <div class="hud-section-title">RELATIVISTIC ASTRODYNAMICS &bull; NASA MATH</div>
+      
+      <div class="metric-card">
+        <div class="metric-title">SCHWARZSCHILD RADIUS (r_s = 2GM / c²)</div>
+        <div id="metric-rs" class="metric-value-box">8.87 mm (Earth)</div>
+        <div class="metric-desc">Critical event horizon radius threshold for gravitational collapse.</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-title">GRAVITATIONAL TIME DILATION (Δt' = Δt√(1 - r_s/r))</div>
+        <div id="metric-dilation" class="metric-value-box">1.000000000696 (Earth Surface)</div>
+        <div class="metric-desc">General Relativistic clock rate variance in gravitational potential.</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-title">CIRCULAR ORBIT VELOCITY (v_orb = √(GM/r))</div>
+        <div id="metric-vorb" class="metric-value-box">29.78 km/s (Mean Orbital Speed)</div>
+        <div class="metric-desc">Keplerian orbital velocity required for stable circular trajectory.</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-title">ESCAPE VELOCITY (v_esc = √(2GM/r))</div>
+        <div id="metric-vesc" class="metric-value-box">11.186 km/s (Terrestrial Escape)</div>
+        <div class="metric-desc">Kinetic velocity required to overcome primary gravitational field.</div>
+      </div>
+    </aside>
+
+    <!-- Universe Mode Telemetry Sidebar -->
+    <aside class="telemetry-sidebar glass-panel">
+      <div class="telemetry-header">
+        <div class="sector-badge">
+          <span class="tag-badge">TARGET LOCKED</span>
+          <span id="tel-sector" class="sector-coord">SOL SYSTEM // SEC-01</span>
+        </div>
+        <h2 id="tel-name" class="target-name">Earth (Terra)</h2>
+        <div id="tel-type" class="target-type">Habitable Terrestrial Biosphere</div>
+      </div>
+
+      <div class="travel-actions">
+        <button id="btn-surface-landing" class="action-btn-primary">🛬 SURFACE SKIM</button>
+        <button id="btn-orbit-view" class="action-btn-secondary">🛰️ ORBITAL VIEW</button>
+        <button id="btn-inspect-pedia" class="action-btn-secondary" style="border-color: var(--accent-gold); color: var(--accent-gold);">🔍 INSPECT IN PEDIA</button>
+      </div>
+
+      <div class="telemetry-grid">
+        <div class="stat-box">
+          <span class="stat-label">MASS</span>
+          <span id="tel-mass" class="stat-value">5.972 × 10²⁴ kg</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">SURFACE GRAVITY</span>
+          <span id="tel-gravity" class="stat-value">9.807 m/s² (1.00g)</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">ORBITAL VELOCITY</span>
+          <span id="tel-velocity" class="stat-value">29.78 km/s</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">ORBITAL PERIOD</span>
+          <span id="tel-period" class="stat-value">365.25 Days</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">TEMPERATURE</span>
+          <span id="tel-temp" class="stat-value">288 K (15°C)</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">ESCAPE VELOCITY</span>
+          <span id="tel-escape" class="stat-value">11.186 km/s</span>
+        </div>
+        <div class="stat-box full-width">
+          <span class="stat-label">SPECTRAL CLASS</span>
+          <span id="tel-spectral" class="stat-value">Class M Biosphere</span>
+        </div>
+        <div class="stat-box full-width">
+          <span class="stat-label">PHYSICS ALERT</span>
+          <span id="tel-alert" class="stat-value" style="color: var(--accent-cyan); font-size: 10px;">ATMOSPHERIC RAYLEIGH SCATTERING</span>
+        </div>
+      </div>
+
+      <p id="tel-desc" class="target-desc">
+        The vibrant blue marble of the Solar System and cradle of known life.
+      </p>
+    </aside>
+
+    <!-- Universe Time Warp Bottom Bar -->
+    <div class="bottom-dock glass-panel">
+      <div class="time-control-group">
+        <span class="dock-label">TIME WARP:</span>
+        <button class="time-speed-btn" data-speed="0">PAUSE</button>
+        <button class="time-speed-btn active" data-speed="1">1X</button>
+        <button class="time-speed-btn" data-speed="5">5X</button>
+        <button class="time-speed-btn" data-speed="25">25X</button>
+        <button class="time-speed-btn" data-speed="100">100X</button>
+      </div>
+      <div class="divider"></div>
+      <button id="btn-toggle-orbits" class="stage-btn active" style="font-size: 9px; padding: 4px 8px;">ORBIT PATHS</button>
+      <button id="btn-cinematic" class="stage-btn" style="font-size: 9px; padding: 4px 8px;">CINEMATIC AUTO</button>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODE B: COSMOPEDIA 3D (100+ CELESTIAL MUSEUM) HUD -->
+  <!-- ============================================================ -->
+  <div id="cosmopedia-hud">
+    <!-- Left Exploration Drawer -->
+    <aside class="pedia-left-drawer glass-panel">
+      <div class="search-box-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="pedia-search-input" class="search-input" placeholder="Search 250+ Objects (EN / বাংলা)...">
+      </div>
+
+      <!-- 9 Sector Filter Pills -->
+      <div id="pedia-sector-pills" class="sector-pills">
+        <button class="sector-pill active" data-sec="all">🌐 All Sectors (250)</button>
+        <!-- Populated via data.js -->
+      </div>
+
+      <!-- Scrollable Entity Card List -->
+      <div id="pedia-entity-list" class="entity-list">
+        <!-- Populated dynamically via JS -->
+      </div>
+    </aside>
+
+    <!-- Center Stage Studio Controls -->
+    <div class="stage-controls-bar glass-panel">
+      <!-- Shading Mode Switcher -->
+      <div class="shading-pills">
+        <button class="shading-pill active" data-shading="pbr">✨ NATURAL</button>
+        <button class="shading-pill" data-shading="thermal">🌡️ THERMAL</button>
+        <button class="shading-pill" data-shading="wireframe">🌐 WIRE</button>
+      </div>
+
+      <!-- Sun Light Directional Controller -->
+      <div class="sun-slider-wrap">
+        <span class="sun-slider-label">☀️ SUN:</span>
+        <input type="range" id="sun-light-slider" class="sun-range-slider" min="0" max="360" value="45" title="Rotate Sunlight Angle">
+      </div>
+
+      <button id="btn-compare-earth" class="stage-btn">
+        <span>🌍</span> COMPARE
+      </button>
+      <button id="btn-locate-universe" class="stage-btn" style="border-color: var(--accent-cyan);">
+        <span>🌌</span> LOCATE
+      </button>
+      <button id="btn-stage-autorotate" class="stage-btn active">
+        <span>🔄</span> TURNTABLE
+      </button>
+    </div>
+
+    <!-- Right Bilingual Dossier Panel -->
+    <aside class="pedia-dossier-panel glass-panel">
+      <div class="lang-switch-group">
+        <div class="lang-pills">
+          <button id="btn-lang-en" class="lang-pill active" data-lang="en">English</button>
+          <button id="btn-lang-bn" class="lang-pill" data-lang="bn">বাংলা</button>
+        </div>
+
+        <!-- Robust Neural Speech Button with Waveform Visualizer -->
+        <button id="voice-narrate-btn" class="speech-btn" title="Toggle Documentary Voice Narration">
+          <div class="waveform-anim"><span></span><span></span><span></span><span></span></div>
+          <span id="voice-btn-text">🔊 Listen / শুনুন</span>
+        </button>
+      </div>
+
+      <div>
+        <div id="dossier-sec-badge" class="tag-badge" style="display:inline-block; margin-bottom: 4px;">SECTOR 01</div>
+        <h2 id="dossier-title-en" class="dossier-name-en">Earth (Terra)</h2>
+        <div id="dossier-title-bn" class="dossier-name-bn">পৃথিবী (টেরা)</div>
+      </div>
+
+      <div class="telemetry-grid">
+        <div class="stat-box">
+          <span class="stat-label">MASS / ভর</span>
+          <span id="dossier-mass" class="stat-value">5.972 × 10²⁴ kg</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">RADIUS / ব্যাসার্ধ</span>
+          <span id="dossier-radius" class="stat-value">6,371 km</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">DISTANCE / দূরত্ব</span>
+          <span id="dossier-dist" class="stat-value">1.00 AU</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">TEMPERATURE / তাপমাত্রা</span>
+          <span id="dossier-temp" class="stat-value">288 K (15°C)</span>
+        </div>
+        <div class="stat-box full-width">
+          <span class="stat-label">SPECTRAL / CLASSIFICATION</span>
+          <span id="dossier-spectral" class="stat-value">Class M Biosphere</span>
+        </div>
+      </div>
+
+      <div class="dossier-narrative-box">
+        <p id="dossier-desc-text">
+          Our home planet, the only known celestial body to harbor thriving organic life and liquid oceans.
+        </p>
+      </div>
+
+      <div class="stat-box" style="margin-top: 4px;">
+        <span class="stat-label">ARCHETYPE 3D VISUALIZER</span>
+        <span id="dossier-archetype" class="stat-value" style="color: var(--accent-nasa); font-family: var(--font-mono); font-size: 11px;">TerrestrialWorld</span>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Load Data & Master Engine -->
+  <script src="data.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
