@@ -1565,6 +1565,17 @@ window.addEventListener('keydown', (e) => {
   keys[e.code] = true;
   if (e.code === 'KeyC' && EngineState.currentMode === 'UNIVERSE') toggleFlightMode();
   if (e.code === 'KeyF' && EngineState.currentMode === 'UNIVERSE') triggerRelativisticWarp();
+  
+  // Press 'P' to export pristine canvas screenshot
+  if (e.key === 'p' || e.key === 'P') {
+    const canvas = renderer.domElement;
+    renderer.render(scene, camera);
+    const image = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.download = `cosmoverse-${EngineState.currentMode.toLowerCase()}-preview.png`;
+    a.href = image;
+    a.click();
+  }
 });
 
 window.addEventListener('keyup', (e) => {

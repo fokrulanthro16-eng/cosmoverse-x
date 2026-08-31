@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # 🌌 COSMOVERSE X (v2.0)
 ### *Next-Gen WebGL2/Three.js Open-Universe Simulation & 250+ Celestial CosmoPedia*
@@ -14,6 +14,22 @@
 </p>
 
 [Explore Features](#-system-architecture) • [Controls](#-flight--inspection-controls) • [Catalog Breakdown](#-250-celestial-matrix) • [Quickstart](#-local-deployment)
+
+</div>
+
+---
+
+## 📸 Visual Previews
+
+<div align="center">
+
+### 🌌 Mode A: Universe Twin (Open-World Simulation)
+<img src="assets/screenshots/universe-mode.png" width="950" alt="CosmoVerse X Universe Twin View" style="border-radius: 10px; border: 1px solid rgba(0, 229, 255, 0.4); box-shadow: 0 0 25px rgba(0, 229, 255, 0.2);">
+
+<br/><br/>
+
+### 📚 Mode B: CosmoPedia 3D (250+ Object Parametric Stage)
+<img src="assets/screenshots/cosmopedia-mode.png" width="950" alt="CosmoVerse X CosmoPedia 3D Stage" style="border-radius: 10px; border: 1px solid rgba(0, 229, 255, 0.4); box-shadow: 0 0 25px rgba(0, 229, 255, 0.2);">
 
 </div>
 
